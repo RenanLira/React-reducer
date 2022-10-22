@@ -1,20 +1,25 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Task } from "../App"
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState, useContext } from "react"
+import { taskDispatch, Task, TaskActionType } from "../Context"
 
 interface TaskItemProps{
     task: Task
-    onChangeTask: any
-    onDeleteTask: (taskId: number) => void
 }
 
-export function TaskItem({task, onChangeTask, onDeleteTask}: TaskItemProps){
+export function TaskItem({task}: TaskItemProps){
+
+    const dispatch = useContext(taskDispatch)
+
     const [taskText, setTaskText] = useState(task.text)
     const [isEditing, setIsEditing] = useState(false)
 
     // useCallback --> Faz memória da função entre as redenrizações
     const handlerDoneChange = useCallback(()=>{
         task.done = !task.done
-        onChangeTask(task)
+        // onChangeTask(task)
+        dispatch({
+            type: TaskActionType.CHANGED,
+            payload: task
+        })
     },[task])
 
 
@@ -26,7 +31,11 @@ export function TaskItem({task, onChangeTask, onDeleteTask}: TaskItemProps){
     // Implantar --> useCallback
     const handleEditSaveClick = () => {
         if (isEditing){
-            onChangeTask({...task, text: taskText})
+            // onChangeTask({...task, text: taskText})
+            dispatch({
+                type: TaskActionType.CHANGED,
+                payload: {...task, text: taskText}
+            })
             setIsEditing(false)
         }else{
             setIsEditing(true)
@@ -63,7 +72,10 @@ export function TaskItem({task, onChangeTask, onDeleteTask}: TaskItemProps){
             }
 
             <button onClick={handleEditSaveClick}>{buttonLabel}</button>
-            <button onClick={() => onDeleteTask(task.id)} >Apagar</button>
+            <button onClick={() => dispatch({
+                type: TaskActionType.DELETED,
+                payload: task
+            })}>Apagar</button>
         </li>
     )
 }

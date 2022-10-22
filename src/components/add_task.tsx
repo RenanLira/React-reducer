@@ -1,12 +1,14 @@
-import { ChangeEvent, FormEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useContext, useState } from "react"
+import { TaskActionType, taskDispatch, taskState } from "../Context"
 
 interface AddTaskProps{
-    onAddTask: (text: string) => void
 }
 
-export function AddTask({onAddTask}: AddTaskProps){
+export function AddTask(){
 
     const [taskText, setTaskText] = useState('')
+    const tasks = useContext(taskState)
+    const dispatch = useContext(taskDispatch)
 
     const handlerDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
         setTaskText(event.target.value)
@@ -14,7 +16,11 @@ export function AddTask({onAddTask}: AddTaskProps){
 
     const handlerSubmit = (event: FormEvent) => {
         event.preventDefault()
-        onAddTask(taskText)
+        // onAddTask(taskText)
+        dispatch({
+            type: TaskActionType.ADDED,
+            payload: {id: tasks.length+1, text: taskText, done: false}
+        })
         setTaskText('')
     }
 
